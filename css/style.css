@@ -67,3 +67,7 @@ header{
     background-color: rgba(0, 128, 207, 0.808);
     color: white;
 }
+.red{
+    background-color: red;
+    color: white;
+}

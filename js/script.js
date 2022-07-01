@@ -21,27 +21,42 @@
 const randomNumberPc = (min,max) => Math.floor(Math.random() * (max - min + 1) + min)
 
 //* 1.3. funzione per creare una cella
-function getNewCell(num, bombe, gridSize, score){
+function getNewCell(num, bombe, gridSize, score,kaboom){
     const cell = document.createElement('div');
     cell.className = 'cell' + gridSize
-    cell.addEventListener('click',()=>onCellClick(cell,num,bombe,score))
+    cell.addEventListener('click',()=>onCellClick(cell,num,bombe,score,kaboom))
     return cell   
 }
 
 function listContains(list, element){
-    for(let i= 0; i<list.lenght;i++){
+    console.log('list:', list, 'element:', element)
+    for(let i= 0; i<list.length; i++){
+        console.log('list[i] === element:', list[i] === element)
         if(list[i] === element) return true
     }
     return false
 }
 
+function resetElementClass(result){
+    result.className = ''
+    return result
+}
+
+function onKaboom(){
+}
 // 2. funzione per colorare la cella al click
-function onCellClick(cell, num, bombe, score){
+function onCellClick(cell, num, bombe, score, kaboom){
     console.log('cella n:',num)
+    if(kaboom){
+        onKaboom()
+        return
+    }
     if(cell.classList.contains('azure') || cell.classList.contains('red')) return 
 
     if(listContains(bombe,num)){
         cell.classList.add('red')
+        kaboom = true
+        onKaboom()
     }else{
         cell.classList.add('azure')
         score+=50
@@ -78,10 +93,11 @@ document.getElementById('start').addEventListener('click', function(){
 
     //! creo la variabile che tiene il punteggio e la passo alla cella che sto creando
     let score = 0
+    let kaboom = false
     //* 1.4. creo celle in base al livello
     for(let i = 1; i <= total; i++ ){
         // 1.4.1 aggancio la cella alla griglia
-        grid.appendChild(getNewCell(i,bombe, level.value, score))
+        grid.appendChild(getNewCell(i,bombe, level.value, score,kaboom))
     }
 })
 

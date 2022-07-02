@@ -17,36 +17,65 @@
 // # MILESTONE 5
 // Quando la partita termina dobbiamo capire se è terminata perchè è stata cliccata una bomba o se perchè l'utente ha raggiunto il punteggio massimo. Dobbiamo poi stampare in pagina il punteggio raggiunto ed il messaggio adeguato in caso di vittoria o sconfitta.
 
+
+// dichiaro le variabili che memorizzano se è esplosa una bomba e a che score sono.
+let kaboom = false
+let score = 0
+// creo le funzioni
 //! funzione per generare i numeri random nel range dato
 const randomNumberPc = (min,max) => Math.floor(Math.random() * (max - min + 1) + min)
 
-//* 1.3. funzione per creare una cella
-function getNewCell(num, bombe, gridSize, score,kaboom){
+//!  funzione per creare una cella
+function getNewCell(num, bombe, gridSize){
     const cell = document.createElement('div');
     cell.className = 'cell' + gridSize
-    cell.addEventListener('click',()=>onCellClick(cell,num,bombe,score,kaboom))
+    cell.addEventListener('click',()=>onCellClick(cell,num,bombe))
     return cell   
 }
-
+// ! funzione per sapere se nell'array c'è il dato elemento
 function listContains(list, element){
-    console.log('list:', list, 'element:', element)
     for(let i= 0; i<list.length; i++){
-        console.log('list[i] === element:', list[i] === element)
         if(list[i] === element) return true
     }
     return false
 }
-
-function resetElementClass(result){
+// ! funzione per rimuovere tutti i figli di un elemento html
+function removeAllChild(element){
+    while (element.firstChild) {
+        element.removeChild(element.lastChild)
+    }
+    return element
+}
+// ! funzione per resettare l'elemento
+function resetElement(result){
+    removeAllChild(result)
     result.className = ''
     return result
 }
-
-function onKaboom(){
+// ! funzione per creare elementi di tipo testo
+function createTextElement(type, text) {
+    const el = document.createElement(type)
+    el.innerText = text
+    return el
 }
-// 2. funzione per colorare la cella al click
-function onCellClick(cell, num, bombe, score, kaboom){
+
+// ! funzione da eseguire quando l'utente perde (esplode una mina)
+function onKaboom(){
+    const result = resetElement(document.getElementById('result'));
+    const shadow = result.parentElement;
+    result.appendChild(createTextElement('h1','💣 Game Over 💣'))
+    result.appendChild(createTextElement('p',`Punteggio: ${score}`))
+    result.classList.add('red');
+    const closePopup = ()=>shadow.classList.remove('show');
+    shadow.addEventListener('click',closePopup);
+    result.addEventListener('click',closePopup)
+    shadow.classList.add('show');
+}
+
+//!  funzione da eseguire a click della cella
+function onCellClick(cell, num, bombe){
     console.log('cella n:',num)
+    console.log('kaboom:',kaboom)
     if(kaboom){
         onKaboom()
         return
@@ -63,16 +92,16 @@ function onCellClick(cell, num, bombe, score, kaboom){
     }
 }
 
-//* 1. mi metto in ascolto sul btn per la creazione della griglia
+//*  mi metto in ascolto sul btn per la creazione della griglia
 document.getElementById('start').addEventListener('click', function(){
-    //* 1.1. prendo l'elemento griglia
-    const grid = document.getElementById('grid');
+    //*  prendo l'elemento griglia e rimuovo eventuali celle preesistenti
+    const grid = removeAllChild(document.getElementById('grid'));
     const level = document.getElementById('level');
-    //* rimuovo eventuali celle preesistenti
-    while (grid.firstChild) {
-        grid.removeChild(grid.lastChild)
-    }
-    //* 1.2. devo creare una griglia di celle
+    // resetto kaboom e score
+    kaboom = false
+    score = 0
+    
+    //*  devo creare una griglia di celle
     let total = 0
     switch(level.value){
         case '10x10': 
@@ -91,13 +120,10 @@ document.getElementById('start').addEventListener('click', function(){
         bombe[i] =  randomNumberPc(1,total)
     }
 
-    //! creo la variabile che tiene il punteggio e la passo alla cella che sto creando
-    let score = 0
-    let kaboom = false
-    //* 1.4. creo celle in base al livello
+    //*  creo celle in base al livello
     for(let i = 1; i <= total; i++ ){
-        // 1.4.1 aggancio la cella alla griglia
-        grid.appendChild(getNewCell(i,bombe, level.value, score,kaboom))
+        //  aggancio la cella alla griglia
+        grid.appendChild(getNewCell(i,bombe, level.value))
     }
 })
 

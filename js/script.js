@@ -20,7 +20,9 @@
 
 // dichiaro le variabili che memorizzano se è esplosa una bomba e a che score sono.
 let kaboom = false
+let win = false
 let score = 0
+let maxScore = 0
 // creo le funzioni
 //! funzione per generare i numeri random nel range dato
 const randomNumberPc = (min,max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -71,6 +73,18 @@ function onKaboom(){
     result.addEventListener('click',closePopup)
     shadow.classList.add('show');
 }
+// ! fumzione da eseguire quando l'utente vince
+function onWin(){
+    const result = resetElement(document.getElementById('result'));
+    const shadow = result.parentElement;
+    result.appendChild(createTextElement('h1','🎉 Hai Vinto 🎉'))
+    result.appendChild(createTextElement('p',`Punteggio: ${score}`))
+    result.classList.add('azure');
+    const closePopup = ()=>shadow.classList.remove('show');
+    shadow.addEventListener('click',closePopup);
+    result.addEventListener('click',closePopup)
+    shadow.classList.add('show');
+}
 
 //!  funzione da eseguire a click della cella
 function onCellClick(cell, num, bombe){
@@ -78,6 +92,10 @@ function onCellClick(cell, num, bombe){
     console.log('kaboom:',kaboom)
     if(kaboom){
         onKaboom()
+        return
+    }
+    if(win){
+        onWin()
         return
     }
     if(cell.classList.contains('azure') || cell.classList.contains('red')) return 
@@ -89,6 +107,10 @@ function onCellClick(cell, num, bombe){
     }else{
         cell.classList.add('azure')
         score+=50
+        if(maxScore===score){
+            win = true
+            onWin()
+        }
     }
 }
 
@@ -100,6 +122,8 @@ document.getElementById('start').addEventListener('click', function(){
     // resetto kaboom e score
     kaboom = false
     score = 0
+    win = false
+
     
     //*  devo creare una griglia di celle
     let total = 0
@@ -116,9 +140,18 @@ document.getElementById('start').addEventListener('click', function(){
     }
     // ! creo array per le bombe
     const bombe = []
-    for (let i = 0; i < 16; i++){
-        bombe[i] =  randomNumberPc(1,total)
+    let i = 0
+    while ( i < 16){
+        const rnp =  randomNumberPc(1,total)
+        if(!listContains(bombe, rnp)){
+            bombe[i] =  rnp
+            i++ 
+        }
+    
     }
+    console.log('bombe:', bombe)
+    //* stabilisco il punteggio massimo dell'utente
+    maxScore = (total - bombe.length)*50
 
     //*  creo celle in base al livello
     for(let i = 1; i <= total; i++ ){
